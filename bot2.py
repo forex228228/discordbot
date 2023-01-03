@@ -11,9 +11,9 @@ async def on_message(message):
     global send_files
     if message.content == '/olena' or '/yana' in message.content and send_files and not message.author.bot:
         await message.delete()
-        files = os.listdir('C:/Users/Sanya/Desktop/kolegy/')
+        files = os.listdir('kolegy/')
         file = random.choice(files)
-        attachment = discord.File(f'C:/Users/Sanya/Desktop/kolegy/{file}')
+        attachment = discord.File(f'kolegy/{file}')
         await message.channel.send(file=attachment)
         
     elif message.content == '/stop':
