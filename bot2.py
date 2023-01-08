@@ -54,7 +54,6 @@ async def on_message(message):
 
     elif message.content == '!stop':
         await message.delete()
-        await voice_client.disconnect()
         send_files = False
 
     elif message.content.startswith('!roll'):
@@ -375,10 +374,40 @@ async def on_message(message):
         
         # Send a message to the channel to confirm that the song is playing
         await message.channel.send(f'Playing {title}')
+        
+@client.command
+async def on_message(message):
+    if message.content.startswith('!stop'):
+    # Stop the music
+        voice_client = ctx.guild.voice_client
+        voice_client.stop()
 
- 
+
+@client.command
+async def on_message(message):
+    if message.content.startswith('!leave'):
+        await voice_client.disconnect()
+
+@client.command
+async def on_message(message, seconds: int):
+    if message.content.startswith('!seek'):
+        # Seek to the specified point in the music
+        voice_client = ctx.guild.voice_client
+        voice_client.seek(seconds)
+    else:
+        await message.channel.send('Playing gg')
+
+@client.command
+async def on_message(message):
+    if message.content.startswith('!pause'):
+    # Pause the music
+        voice_client = ctx.guild.voice_client
+        voice_client.pause()
+        await message.channel.send('Playing gg')
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(status=discord.Status.online, activity=discord.Game('Santiago.#3083 | !help'))
 client.run('MTA1OTE2MDg4NzI3NTAzMjY0Nw.GoIC2Q.3S3EGGM8hw5-Mp1ASgmsXeAu1nwHoDc5ShVUfM')
+
