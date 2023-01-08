@@ -326,4 +326,4 @@ async def on_message(message):
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(status=discord.Status.online, activity=discord.Game('Santiago.#3083 | !help'))
-client.run('MTA1OTE2MDg4NzI3NTAzMjY0Nw.GoIC2Q.3S3EGGM8hw5-Mp1ASgmsXeAu1nwHoDc5ShVUfM')
+client.run('')
