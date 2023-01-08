@@ -1,7 +1,3 @@
-import discord
-import random
-import os
-from discord.ext import commands
 import requests
 from io import BytesIO
 import aiohttp
@@ -13,30 +9,6 @@ from io import BytesIO
 import datetime
 import asyncio
 import time
-import youtube_dl
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
-client_id = '8bb573f1092f4f9cb6e71004c11d8844'
-client_secret = '5672a4b3512448c9b6e05a66e96bb436'
-redirect_uri = 'https://www.spotify.com/ua-en/account/overview/'
-username = 'discordmusicbot'
-scope = 'user-read-private user-read-playback-state user-modify-playback-state'
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-seconds = 0
-player = None
-
-
-ydl_opts = {
-    'format': 'bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
-        'preferredquality': '192',
-    }],
-}
-
 
 client = discord.Client(intents=discord.Intents.all())
 last_used_time = 0
@@ -46,6 +18,8 @@ client = commands.Bot(command_prefix='!',intents=discord.Intents.all())
 @client.event
 async def on_message(message):
     global send_files
+    global seconds
+    global player
     if message.content == '!olena' or '!yana' in message.content and send_files and not message.author.bot:
         await message.delete()
         files = os.listdir('/home/forex27649/')
@@ -344,67 +318,7 @@ async def on_message(message):
         embed.set_footer(text='Bot was made by Santiago.#3083', icon_url=avatar)
         # sending the embed
         await message.channel.send(embed=embed)
- 
-@client.event 
-async def music_func(message):
-    global seconds
-    global player
-    # If the message is a command to play a song
-    if message.content.startswith('!play'):
-        # Split the command into the command and the song name
-        command, song = message.content.split(' ', 1)
 
-        # Check if the song is a Spotify link
-        if 'youtube' in song or 'youtu.be' in song:
-            # Use YouTube API to get the video information
-            video = youtube_dl.YoutubeDL(ydl_opts).extract_info(song, download=False)
-            # Get the video title and url
-            title = video['title']
-            url = video['url']
-        elif 'spotify' in song:
-            # Use Spotify API to get the track information
-            track = sp.track(song)
-            # Get the track name and url
-            title = track['name']
-            url = track['preview_url']
-        else:
-            # The song is not a YouTube or Spotify link
-            await message.channel.send('Invalid link')
-            return
-        
-        # Create a new voice client and play the song
-        voice_client = await message.author.voice.channel.connect()
-        player = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url))
-        voice_client.play(player)
-        
-        # Send a message to the channel to confirm that the song is playing
-        await message.channel.send(f'Playing {title}')
-    if message.content.startswith('!stop'):
-    # Stop the music
-        voice_client = message.guild.voice_client
-        voice_client.stop()
-    elif message.content.startswith('!seek'):
-        # Seek to the specified point in the music
-        seconds = int(message.content.split()[1])
-        voice_client = message.guild.voice_client
-        input_file = url
-        url = player.source
-        options = player.options
-        before_options = player.before_options
-        player = discord.FFmpegPCMAudio(url)
-        player.cleanup()
-        player = discord.FFmpegPCMAudio(input_file, options=options, before_options=before_options)
-        player.seek(seconds)
-        voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-    elif message.content.startswith('!pause'):
-        # Pause the music
-        voice_client = message.guild.voice_client
-        voice_client.pause()
-    elif message.content.startswith('!leave'):
-        # Pause the music
-        voice_client = message.guild.voice_client
-        voice_client.disconnect()     
-    pass       
 
 
     
