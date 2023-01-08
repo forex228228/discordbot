@@ -24,6 +24,9 @@ username = 'discordmusicbot'
 scope = 'user-read-private user-read-playback-state user-modify-playback-state'
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+seconds = 0
+player = None
+
 
 ydl_opts = {
     'format': 'bestaudio/best',
@@ -343,7 +346,9 @@ async def on_message(message):
         await message.channel.send(embed=embed)
  
 @client.event 
-async def on_message(message):
+async def music_func(message):
+    global seconds
+    global player
     # If the message is a command to play a song
     if message.content.startswith('!play'):
         # Split the command into the command and the song name
@@ -374,40 +379,37 @@ async def on_message(message):
         
         # Send a message to the channel to confirm that the song is playing
         await message.channel.send(f'Playing {title}')
-        
-@client.command
-async def on_message(message):
     if message.content.startswith('!stop'):
     # Stop the music
-        voice_client = ctx.guild.voice_client
+        voice_client = message.guild.voice_client
         voice_client.stop()
-
-
-@client.command
-async def on_message(message):
-    if message.content.startswith('!leave'):
-        await voice_client.disconnect()
-
-@client.command
-async def on_message(message, seconds: int):
-    if message.content.startswith('!seek'):
+    elif message.content.startswith('!seek'):
         # Seek to the specified point in the music
-        voice_client = ctx.guild.voice_client
-        voice_client.seek(seconds)
-    else:
-        await message.channel.send('Playing gg')
-
-@client.command
-async def on_message(message):
-    if message.content.startswith('!pause'):
-    # Pause the music
-        voice_client = ctx.guild.voice_client
+        seconds = int(message.content.split()[1])
+        voice_client = message.guild.voice_client
+        input_file = url
+        url = player.source
+        options = player.options
+        before_options = player.before_options
+        player = discord.FFmpegPCMAudio(url)
+        player.cleanup()
+        player = discord.FFmpegPCMAudio(input_file, options=options, before_options=before_options)
+        player.seek(seconds)
+        voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+    elif message.content.startswith('!pause'):
+        # Pause the music
+        voice_client = message.guild.voice_client
         voice_client.pause()
-        await message.channel.send('Playing gg')
+    elif message.content.startswith('!leave'):
+        # Pause the music
+        voice_client = message.guild.voice_client
+        voice_client.disconnect()     
+    pass       
 
+
+    
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
     await client.change_presence(status=discord.Status.online, activity=discord.Game('Santiago.#3083 | !help'))
 client.run('MTA1OTE2MDg4NzI3NTAzMjY0Nw.GoIC2Q.3S3EGGM8hw5-Mp1ASgmsXeAu1nwHoDc5ShVUfM')
-
