@@ -53,7 +53,8 @@ async def on_message(message):
         await message.channel.send(file=attachment)
 
     elif message.content == '!stop':
-        message.delete()
+        await message.delete()
+        await voice_client.disconnect()
         send_files = False
 
     elif message.content.startswith('!roll'):
@@ -350,7 +351,13 @@ async def on_message(message):
         command, song = message.content.split(' ', 1)
 
         # Check if the song is a Spotify link
-        if 'spotify' in song:
+        if 'youtube' in song or 'youtu.be' in song:
+            # Use YouTube API to get the video information
+            video = youtube_dl.YoutubeDL(ydl_opts).extract_info(song, download=False)
+            # Get the video title and url
+            title = video['title']
+            url = video['url']
+        elif 'spotify' in song:
             # Use Spotify API to get the track information
             track = sp.track(song)
             # Get the track name and url
